@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 public class ShoutController {
 
-	@Value("${greetings.hostname:greetings}")
+	@Value("${greetings.hostname:greeting}")
 	private String greetingsHostname;
 	
 	@Value("${greetings.port:8080}")
