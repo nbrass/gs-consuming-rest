@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author nbrass
  *
@@ -15,8 +17,10 @@ import org.springframework.web.client.RestTemplate;
  *         -Dspring-boot.run.arguments=--greetings.hostname=localhost
  *         spring-boot:run
  */
+@Slf4j
 @RestController
 public class ShoutController {
+ 
 
 	@Value("${greetings.hostname:greeting}")
 	private String greetingsHostname;
@@ -40,10 +44,11 @@ public class ShoutController {
 			return new Greeting(0, "No, I'm not going to greet that often or less...");
 			
 		HelloResponse helloResp = new HelloResponse();
-		for (int i = 0; i < calls; i++) {
+		for (int i = 1; i <= calls; i++) {
 			helloResp = restTemplate.getForObject(
 					"http://" + greetingsHostname + ":" + greetingsPort + "/greeting?name=" + name,
 					HelloResponse.class);
+			log.info("### Called greeting service - " + i);
 
 			// wait a little bit
 			try {
