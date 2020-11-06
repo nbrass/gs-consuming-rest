@@ -1,0 +1,15 @@
+oc new-project spring-boot
+
+oc new-app -i java --name=shout https://github.com/nbrass/gs-rest-service.git --context-dir complete
+
+Add "spring-boot" namespace to Service Mesh Member Role in istio-system namespace
+
+Add sidecar injection and labels for app and version to deployment:
+	oc patch deployment/shout --patch '{"spec":{"template":{"metadata":{"annotations":{"sidecar.istio.io/inject": "true"}}}}}'
+	oc patch deployment/shout --patch '{"spec":{"template":{"metadata":{"labels":{"app": "shout"}}}}}'
+	oc patch deployment/shout --patch '{"spec":{"template":{"metadata":{"labels":{"version": "v1"}}}}}'
+
+Add Service Mesh config:
+	oc apply -f service_mesh.yaml
+
+-> http://istio-ingressgateway-istio-system.apps.slider.os.fyre.ibm.com/shout?name=John

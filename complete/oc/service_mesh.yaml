@@ -1,0 +1,47 @@
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: shout
+spec:
+  hosts:
+    - '*'
+  gateways:
+    - shout-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /shout
+      route:
+        - destination:
+            host: shout
+            port:
+              number: 8080
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: shout
+spec:
+  host: shout
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+    - labels:
+        version: v1
+      name: v1
+---
+kind: Gateway
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: shout-gateway
+spec:
+  servers:
+    - hosts:
+        - '*'
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+  selector:
+    istio: ingressgateway
