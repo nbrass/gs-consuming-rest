@@ -16,3 +16,4 @@ dependency-reduced-pom.xml
 *.iml
 README.html
 .DS_Store
+/complete/src/main/resources/application.yaml
