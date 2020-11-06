@@ -12,4 +12,4 @@ Add sidecar injection and labels for app and version to deployment:
 Add Service Mesh config:
 	oc apply -f service_mesh.yaml
 
--> http://istio-ingressgateway-istio-system.apps.slider.os.fyre.ibm.com/shout?name=John
+-> http://istio-ingressgateway-istio-system.apps.slider.os.fyre.ibm.com/shout?name=John&calls=3&wait=3
