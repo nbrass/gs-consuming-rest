@@ -17,6 +17,27 @@ spec:
             port:
               number: 8080
 ---
+kind: VirtualService
+apiVersion: networking.istio.io/v1alpha3
+metadata:
+  name: shout-traces
+spec:
+  hosts:
+    - '*'
+  gateways:
+    - shout-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /shouttraces
+      rewrite:
+        uri: /actuator/httptrace
+      route:
+        - destination:
+            host: shout
+            port:
+              number: 8080
+---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
