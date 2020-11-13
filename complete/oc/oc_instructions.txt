@@ -21,3 +21,5 @@ LOCAL
 Start with: ./mvnw -Dspring-boot.run.arguments="--greetings.hostname=localhost --server.port=8081" spring-boot:run
 
 -> http://localhost:8081/shout?name=John&calls=1&wait=1
+
+-> http://localhost:8081/actuator/httptrace
