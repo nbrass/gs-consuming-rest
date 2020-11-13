@@ -56,7 +56,7 @@ public class ShoutController {
 			// -> the key needs to be added in application.yaml
 			// (spring.sleuth.baggage.remote-fields)
 			BaggageField requestBaggage = BaggageField.create("requestId");
-			requestBaggage.updateValue(tracer.currentSpan().context().spanIdString());
+			requestBaggage.updateValue(tracer.currentSpan().context().traceIdString());
 			
 			BaggageField machineBaggage = BaggageField.create("machineName");
 			machineBaggage.updateValue(getHostname());
