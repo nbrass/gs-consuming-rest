@@ -1,0 +1,31 @@
+spring:
+  application:
+    name:  shout
+  sleuth:
+    baggage:
+      remote-fields:
+        - requestId
+        - machineName
+      tag-fields:
+        - requestId
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: httptrace
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          client:
+            RestTemplate: DEBUG
+      apache:
+        http: DEBUG
+    httpclient:
+      wire: DEBUG

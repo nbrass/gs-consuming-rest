@@ -1,36 +1,33 @@
 package com.example.consumingrest;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import brave.Tracer;
+import brave.baggage.BaggageField;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author nbrass
  *
- *         Start application for local testing with following command: ./mvnw
- *         -Dspring-boot.run.arguments=--greetings.hostname=localhost
- *         spring-boot:run
  */
 @Slf4j
 @RestController
 public class ShoutController {
-	
-	@Bean
-	public RestTemplate template() {
-	    return new RestTemplate();
-	}
-	
+
 	@Autowired
-	private RestTemplate template;
+	private Tracer tracer;
+
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Value("${greetings.hostname:greeting}")
 	private String greetingsHostname;
@@ -42,8 +39,6 @@ public class ShoutController {
 	public Greeting shout(@RequestParam(value = "name", defaultValue = "World") String name,
 			@RequestParam(value = "calls", defaultValue = "1") Integer calls,
 			@RequestParam(value = "wait", defaultValue = "0") Integer wait) {
-		template.setRequestFactory(new HttpComponentsClientHttpRequestFactory()); // needed for HTTP logging via
-																						// Apache HttpClient
 
 		// just some checks to avoid overheated CPUs
 		if (wait < 0)
@@ -56,8 +51,18 @@ public class ShoutController {
 
 		HelloResponse helloResp = new HelloResponse();
 		for (int i = 1; i <= calls; i++) {
+
+			// here comes our custom header that will be added as HTTP-Header
+			// -> the key needs to be added in application.yaml
+			// (spring.sleuth.baggage.remote-fields)
+			BaggageField requestBaggage = BaggageField.create("requestId");
+			requestBaggage.updateValue(tracer.currentSpan().context().spanIdString());
+			
+			BaggageField machineBaggage = BaggageField.create("machineName");
+			machineBaggage.updateValue(getHostname());
+
 			log.info("### Call greeting service - " + i);
-			helloResp = template.getForObject(
+			helloResp = restTemplate.getForObject(
 					"http://" + greetingsHostname + ":" + greetingsPort + "/greeting?name=" + name,
 					HelloResponse.class);
 
@@ -69,5 +74,18 @@ public class ShoutController {
 			}
 		}
 		return new Greeting(helloResp.getId(), helloResp.getContent().toUpperCase());
+	}
+
+	private String getHostname() {
+		String hostname = "Unknown";
+
+		try {
+			InetAddress addr;
+			addr = InetAddress.getLocalHost();
+			hostname = addr.getHostName();
+		} catch (UnknownHostException ex) {
+			System.out.println("Hostname can not be resolved");
+		}
+		return hostname;
 	}
 }
